@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>Simulacro de Conducción Colombia</title>
+<style>
+:root{
+  --ink:#101828; --muted:#667085; --bg:#f2f3f6; --card:#ffffff; --soft:#eef0f5; --soft2:#e3e7ef;
+  --blue:#003893; --blue2:#0a4cc4; --yellow:#fcd116; --red:#ce1126;
+  --ok:#17a05d; --okbg:#d9f4e5; --bad:#d92d3f; --badbg:#fde1e4;
+}
+*{box-sizing:border-box;border-radius:0;margin:0;padding:0}
+html{color-scheme:light}
+body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--ink);line-height:1.45;min-height:100vh;-webkit-tap-highlight-color:transparent}
+button{font:inherit;color:inherit;border:0;outline:0;background:none;cursor:pointer}
+button:focus-visible{background-image:linear-gradient(rgba(252,209,22,.35),rgba(252,209,22,.35))}
+img{display:block}
+.flag{height:6px;background:linear-gradient(90deg,var(--yellow) 50%,var(--blue) 50% 75%,var(--red) 75%)}
+.wrap{max-width:780px;margin:0 auto;padding:0 16px 48px}
+.top{display:flex;align-items:center;justify-content:space-between;padding:16px 0 8px;gap:12px}
+.brand{font-weight:800;letter-spacing:.06em;font-size:13px;color:var(--blue);text-transform:uppercase}
+.icon{width:40px;height:40px;background:var(--card);font-size:18px;display:grid;place-items:center}
+.icon:hover{background:var(--soft2)}
+h1{font-size:clamp(28px,6vw,40px);line-height:1.08;letter-spacing:-.02em;margin:18px 0 8px}
+h1 em{font-style:normal;background:var(--yellow);padding:0 6px}
+.lead{color:var(--muted);max-width:56ch}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:22px 0}
+.stat{background:var(--card);padding:14px 16px}
+.stat b{display:block;font-size:26px;letter-spacing:-.02em}
+.stat span{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+@media(max-width:640px){.grid{grid-template-columns:1fr}.stats b{font-size:22px}}
+.mode{background:var(--card);padding:20px;display:flex;flex-direction:column;gap:12px}
+.mode h2{font-size:18px}
+.mode p{color:var(--muted);font-size:14px;flex:1}
+.tag{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--blue)}
+.seg{display:flex;gap:4px}
+.seg button{flex:1;padding:10px 0;background:var(--soft);font-weight:700}
+.seg button.on{background:var(--ink);color:#fff}
+.chips{display:flex;flex-wrap:wrap;gap:4px}
+.chips button{padding:9px 12px;background:var(--soft);font-size:14px;font-weight:600}
+.chips button:hover{background:var(--soft2)}
+.btn{padding:13px 18px;background:var(--blue);color:#fff;font-weight:700;text-align:center}
+.btn:hover{background:var(--blue2)}
+.btn.alt{background:var(--soft);color:var(--ink)}
+.btn.alt:hover{background:var(--soft2)}
+.btn.yellow{background:var(--yellow);color:var(--ink)}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.foot{margin-top:28px;font-size:12px;color:var(--muted);display:flex;flex-wrap:wrap;gap:6px 16px;justify-content:space-between}
+.foot button{color:var(--blue);font-size:12px;text-decoration:underline}
+.notice{background:#fff6c7;padding:10px 14px;font-size:13px;margin:12px 0}
+
+/* quiz */
+.qtop{display:flex;align-items:center;gap:10px;padding:14px 0 10px}
+.qtop .count{font-weight:800}
+.qtop .sp{flex:1}
+.timer{font-variant-numeric:tabular-nums;font-weight:800;background:var(--card);padding:8px 12px;min-width:76px;text-align:center}
+.timer.low{background:var(--badbg);color:var(--bad)}
+.bar{height:6px;background:var(--soft2)}
+.bar i{display:block;height:100%;background:var(--blue);transition:width .25s}
+.card{background:var(--card);padding:20px;margin-top:10px;position:relative;overflow:hidden}
+.cat{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--blue);margin-bottom:8px}
+.sign{background:#f7f8fb;display:grid;place-items:center;height:230px;margin:0 0 16px;position:relative}
+.sign img{max-height:200px;max-width:80%;object-fit:contain;opacity:0;transition:opacity .2s}
+.sign img.in{opacity:1}
+.sign .code{position:absolute;right:8px;top:8px;font-size:11px;font-weight:700;background:var(--yellow);padding:3px 7px;display:none}
+.reveal .sign .code{display:block}
+.q{font-size:clamp(18px,3.6vw,22px);font-weight:700;line-height:1.3;margin-bottom:16px}
+.opts{display:grid;gap:8px}
+.opt{display:flex;gap:12px;align-items:center;text-align:left;padding:14px;background:var(--soft);min-height:56px;transition:background .12s,transform .06s}
+.opt:hover{background:var(--soft2)}
+.opt:active{transform:scale(.995)}
+.opt .k{flex:none;width:28px;height:28px;display:grid;place-items:center;background:#fff;font-weight:800;font-size:13px}
+.opt.sel{background:#dbe6ff}
+.opt.ok{background:var(--okbg)}
+.opt.ok .k{background:var(--ok);color:#fff}
+.opt.no{background:var(--badbg)}
+.opt.no .k{background:var(--bad);color:#fff}
+.opt.dim{opacity:.55}
+.reveal .opt{cursor:default}
+.imgopts{grid-template-columns:1fr 1fr}
+.imgopts .opt{flex-direction:column;padding:12px;gap:8px}
+.imgopts .opt img{height:120px;max-width:100%;object-fit:contain;opacity:0;transition:opacity .2s}
+.imgopts .opt img.in{opacity:1}
+.fb{margin-top:12px;padding:14px 16px;display:none}
+.fb.show{display:block;animation:rise .2s}
+.fb.good{background:var(--okbg)}
+.fb.bad{background:var(--badbg)}
+.fb strong{display:block;margin-bottom:4px}
+.fb p{font-size:14px}
+.next{margin-top:12px;display:flex;justify-content:flex-end}
+.pop{position:absolute;right:18px;top:12px;font-size:52px;line-height:1;pointer-events:none;opacity:0;z-index:2}
+.pop.go{animation:pop .9s ease-out}
+.shake{animation:shake .35s}
+@keyframes pop{0%{opacity:0;transform:scale(.3)}25%{opacity:1;transform:scale(1.25)}60%{opacity:1;transform:scale(1)}100%{opacity:0;transform:translateY(-10px) scale(1)}}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-7px)}40%{transform:translateX(7px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
+@keyframes rise{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.loading{padding:60px 0;text-align:center;color:var(--muted)}
+
+/* results */
+.res{background:var(--card);padding:28px 20px;text-align:center;margin-top:12px}
+.res .big{font-size:64px;font-weight:800;letter-spacing:-.03em;line-height:1}
+.res .verdict{display:inline-block;margin-top:12px;padding:6px 12px;font-weight:800;font-size:13px;letter-spacing:.05em;text-transform:uppercase}
+.verdict.pass{background:var(--okbg);color:#0c6b3b}
+.verdict.fail{background:var(--badbg);color:#a31828}
+.verdict.neutral{background:var(--yellow)}
+.meta{display:flex;justify-content:center;gap:24px;margin-top:16px;color:var(--muted);font-size:14px}
+.meta b{color:var(--ink)}
+.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px;justify-content:center}
+.fails h3{margin:24px 0 8px;font-size:16px}
+.fail{background:var(--card);padding:14px;display:flex;gap:14px;margin-bottom:8px;align-items:flex-start}
+.fail img{width:84px;height:84px;object-fit:contain;background:#f7f8fb;flex:none}
+.fail p{font-size:14px}
+.fail .a{color:#0c6b3b;font-weight:700}
+.fail .b{color:var(--bad)}
+.fail .c{color:var(--muted);font-size:12px;margin-top:4px}
+
+/* auditoría */
+.audit{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin-top:12px}
+.tile{background:var(--card);padding:10px;text-align:center;font-size:12px}
+.tile .im{height:110px;display:grid;place-items:center;background:#f7f8fb;margin-bottom:6px}
+.tile img{max-width:90%;max-height:100px}
+.tile b{display:block}
+.tile.err{background:var(--badbg)}
+.tile.err .im::after{content:"no carga";color:var(--bad);font-weight:700}
+.tile.good .im::after{content:""}
+.sum{background:var(--card);padding:14px 16px;margin-top:10px;font-weight:600}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="flag"></div>
+<div class="wrap" id="app"></div>
+
+<script>
+"use strict";
+/* ============================================================
+   CONFIGURACIÓN (ajusta aquí si cambian las reglas del examen)
+   ============================================================ */
+const CONFIG = {
+  EXAM_QUESTIONS: 30,      // preguntas del simulacro completo
+  EXAM_MINUTES: 30,        // tiempo del simulacro
+  PASS_RATIO: 0.70,        // umbral de aprobación de referencia
+  EXAM_SIGN_SHARE: 0.60,   // proporción de señales en el simulacro
+  MINI_SIGN_SHARE: 0.60,   // proporción de señales en el mini-test
+  PRACTICE_LEN: 10,        // preguntas por práctica de categoría
+  TOTAL_BANK: 250,
+  IMG_BASE: "https://commons.wikimedia.org/wiki/Special:FilePath/",
+  IMG_PREFIX: "Colombia_road_sign_",
+  IMG_TIMEOUT: 9000
+};
+
+/* ============================================================
+   SEÑALES  (código | significado)   Fuente de imágenes: Wikimedia Commons
+   Archivo: Colombia_road_sign_<CÓDIGO>.svg  — Manual de Señalización Vial (Res. 1885/2015)
+   ============================================================ */
+const SIGNS_RAW = `
+SP-01|Curva pronunciada a la izquierda
+SP-02|Curva pronunciada a la derecha
+SP-03|Curva a la izquierda
+SP-04|Curva a la derecha
+SP-05|Curva y contracurva pronunciadas, la primera a la izquierda
+SP-06|Curva y contracurva pronunciadas, la primera a la derecha
+SP-07|Camino sinuoso, inicia a la izquierda
+SP-08|Camino sinuoso, inicia a la derecha
+SP-11|Cruce de vías (intersección en cruz)
+SP-12|Vía lateral a la izquierda
+SP-13|Vía lateral a la derecha
+SP-14|Intersección en T
+SP-15|Intersección en Y
+SP-20|Glorieta (rotonda) adelante
+SP-21|Confluencia de tráfico por la izquierda
+SP-22|Confluencia de tráfico por la derecha
+SP-23|Semáforo adelante
+SP-24|Pavimento irregular
+SP-25|Resalto o reductor de velocidad
+SP-26|Depresión o hundimiento de la vía
+SP-27|Pendiente descendente pronunciada
+SP-27A|Pendiente ascendente pronunciada
+SP-28|Estrechamiento de la calzada
+SP-29|Señal de PARE adelante
+SP-30|Estrechamiento de la calzada por la izquierda
+SP-31|Estrechamiento de la calzada por la derecha
+SP-33|Señal de CEDA EL PASO adelante
+SP-34|Ensanchamiento de la calzada por la izquierda
+SP-35|Ensanchamiento de la calzada por la derecha
+SP-36|Puente angosto
+SP-37|Túnel
+SP-39|Tránsito en dos sentidos
+SP-42|Caída de rocas (derrumbes)
+SP-44|Pavimento resbaladizo
+SP-45|Maquinaria agrícola en la vía
+SP-46|Peatones en la vía
+SP-46A|Cruce peatonal
+SP-47|Zona escolar
+SP-47A|Cruce escolar
+SP-48|Niños jugando
+SP-52|Cruce con vía férrea (paso a nivel)
+SP-55|Inicio de doble calzada
+SP-56|Fin de doble calzada
+SP-57|Fin del pavimento
+SP-59|Ciclistas en la vía
+SP-59A|Cruce de ciclistas
+SP-69|Curva en horquilla a la izquierda
+SP-70|Curva en horquilla a la derecha
+SP-71|Gravilla suelta
+SP-73|Vientos laterales fuertes
+SR-01|Pare
+SR-02|Ceda el paso
+SR-03|Siga de frente (obligatorio)
+SR-04|Contravía: prohibido el paso
+SR-05|Gire a la izquierda (obligatorio)
+SR-06|Prohibido girar a la izquierda
+SR-07|Gire a la derecha (obligatorio)
+SR-08|Prohibido girar a la derecha
+SR-09|Solo retorno (giro en U obligatorio)
+SR-10|Prohibido el retorno (giro en U)
+SR-11|Tránsito en ambos sentidos
+SR-14|Prohibido cambiar de carril
+SR-17|Camiones por el carril derecho
+SR-18|Prohibido el paso de camiones
+SR-20|Prohibido el paso de peatones
+SR-21|Prohibido el paso de jinetes
+SR-22|Prohibido el paso de bicicletas
+SR-23|Prohibido el paso de motocicletas
+SR-24|Prohibido el paso de tractores
+SR-25|Prohibido vehículos de tracción animal
+SR-26|Prohibido adelantar
+SR-28|Prohibido parquear
+SR-28A|Prohibido detenerse
+SR-29|Prohibido pitar
+SR-30|Velocidad máxima permitida
+SR-30A|Velocidad mínima permitida
+SR-31|Peso máximo permitido
+SR-32|Altura máxima permitida
+SR-33|Ancho máximo permitido
+SR-35|Luces bajas obligatorias
+SR-37|Vía exclusiva para bicicletas
+SR-38|Vía de un solo sentido
+SR-39|Vía de doble sentido
+SR-40|Zona de ascenso y descenso de pasajeros
+SR-41|Prohibido ascenso y descenso de pasajeros
+SR-42|Zona de cargue y descargue
+SR-43|Prohibido cargue y descargue
+SR-44|Mantenga la distancia de seguridad
+SR-47|No bloquee la intersección
+SR-48|Fin de la prohibición de adelantar
+SR-52|Prohibido el paso de buses
+SRM-01|Vía exclusiva para motocicletas
+SI-07|Parqueadero
+SI-08|Paradero de buses
+SI-09|Parqueadero de taxis
+SI-11|Ciclorruta
+SI-13|Zona militar
+SI-14|Aeropuerto
+SI-15|Alojamiento (hotel)
+SI-16|Primeros auxilios
+SI-17|Servicios sanitarios
+SI-18|Restaurante
+SI-19|Teléfono
+SI-20|Iglesia
+SI-21|Taller mecánico
+SI-22|Estación de servicio (gasolina)
+SI-23|Reparación de llantas (montallantas)
+SI-31|Zona recreativa
+`;
+
+const GROUPS = {
+  P:{cat:"preventivas", name:"Señales preventivas", tip:"Las señales preventivas son amarillas (normalmente triangulares o en rombo) y advierten un peligro en la vía."},
+  R:{cat:"reglamentarias", name:"Señales reglamentarias", tip:"Las señales reglamentarias son circulares, de fondo blanco con borde rojo (o azules las de obligación), e indican prohibiciones, restricciones u obligaciones."},
+  I:{cat:"informativas", name:"Señales informativas", tip:"Las señales informativas son rectangulares y guían al usuario con servicios, destinos y lugares."}
+};
+const CATS = {
+  preventivas:"Señales preventivas", reglamentarias:"Señales reglamentarias", informativas:"Señales informativas",
+  normas:"Normas de circulación", documentos:"Licencias, documentos y sanciones", seguridad:"Conducción segura y mecánica"
+};
+
+/* ============================================================
+   PREGUNTAS DE TEXTO  [categoría, pregunta, CORRECTA, mala, mala, mala, explicación]
+   (la posición de la correcta se baraja al jugar)
+   ============================================================ */
+const TEXT_RAW = [
+/* ---------- NORMAS DE CIRCULACIÓN ---------- */
+["normas","Ante un semáforo en luz roja fija, el conductor debe:","Detenerse antes de la línea de pare y esperar la luz verde","Reducir la velocidad y pasar con precaución","Pasar si no vienen vehículos","Detenerse solo si hay peatones","La luz roja obliga a detenerse completamente antes de la línea de pare o el cruce peatonal."],
+["normas","La luz amarilla del semáforo indica:","Precaución: prepararse para detenerse","Acelerar para alcanzar a pasar","Que se puede continuar sin restricción","Que el semáforo está dañado","El amarillo advierte el cambio a rojo: hay que prepararse para detener el vehículo con seguridad."],
+["normas","La luz amarilla intermitente en un semáforo significa:","Reducir la velocidad y avanzar con precaución","Detenerse por completo","Que la vía está cerrada","Que tiene prelación sobre los demás vehículos","El amarillo intermitente es una advertencia: se puede avanzar con precaución y atento al cruce."],
+["normas","La luz roja intermitente en un semáforo obliga a:","Detenerse totalmente, como ante una señal de PARE, y continuar cuando sea seguro","Pasar con precaución sin detenerse","Esperar siempre la luz verde","Acelerar para despejar el cruce","El rojo intermitente se trata como una señal de PARE: detención total y luego avanzar si el cruce está libre."],
+["normas","En un cruce con cebra (paso peatonal), el peatón que ya está cruzando:","Tiene prelación y el conductor debe detenerse","Debe esperar a que pasen los vehículos","Solo tiene prelación si hay semáforo","Debe correr para despejar la vía","El peatón tiene prelación en los cruces peatonales; el conductor debe detenerse y cederle el paso."],
+["normas","Si un vehículo de emergencia se acerca con sirena y luces encendidas, usted debe:","Ceder el paso y orillarse a la derecha de forma segura","Acelerar para alejarse","Mantener su carril sin cambiar nada","Detenerse en la mitad de la vía","Los vehículos de emergencia tienen prelación: se les facilita el paso orillándose a la derecha."],
+["normas","En una glorieta o rotonda, tiene prelación:","El vehículo que ya se encuentra circulando dentro de ella","El que va a entrar a mayor velocidad","El vehículo más grande","El que viene por la derecha, siempre","Quien ya está dentro de la glorieta tiene el derecho de paso; el que entra debe ceder."],
+["normas","Una línea amarilla continua en el centro de la calzada significa:","Está prohibido adelantar","Se puede adelantar con precaución","Inicio de una zona escolar","Fin de la vía","La línea amarilla continua separa sentidos opuestos y prohíbe adelantar o cruzarla."],
+["normas","Una línea amarilla discontinua en el centro de la calzada indica que:","Se puede adelantar cuando sea seguro hacerlo","Está prohibido adelantar","Es una zona de parqueo","Hay un cruce peatonal","La línea discontinua permite adelantar si la visibilidad y el tráfico lo permiten."],
+["normas","Las líneas blancas en la calzada separan:","Carriles que van en el mismo sentido","Sentidos opuestos de circulación","Zonas de parqueo prohibido","Zonas escolares","El color blanco separa carriles de tránsito en el mismo sentido; el amarillo, sentidos opuestos."],
+["normas","Como regla general, el adelantamiento se realiza por:","La izquierda, señalizando previamente","La derecha, siempre","Cualquier lado según convenga","El andén o berma","Se adelanta por la izquierda, con direccional y verificando que la vía esté libre."],
+["normas","Está prohibido adelantar en:","Curvas, cruces, puentes y zonas con visibilidad limitada","Vías rectas con buena visibilidad","Autopistas con carril libre","Vías con línea amarilla discontinua","No se debe adelantar donde no se vea claramente que la maniobra es segura."],
+["normas","La velocidad máxima en zonas escolares y residenciales es, como regla general:","30 km/h","50 km/h","60 km/h","80 km/h","En zonas escolares y residenciales el límite general es de 30 km/h, salvo que la señalización indique otra cosa."],
+["normas","La velocidad máxima general en vías urbanas es, como regla general:","50 km/h","30 km/h","80 km/h","100 km/h","Salvo señalización distinta, la velocidad máxima urbana general es de 50 km/h."],
+["normas","Está prohibido parquear:","Sobre el andén, el cruce peatonal o a menos de 5 metros de una esquina","Junto al andén derecho en una zona permitida","En un parqueadero autorizado","En zonas de parqueo señalizadas","Parquear en andenes, cruces peatonales o muy cerca de esquinas obstruye y es infracción."],
+["normas","Las luces direccionales se deben usar:","Con anticipación antes de girar o cambiar de carril","Solo cuando hay policía","Después de iniciar la maniobra","Nunca en ciudad","La señal debe darse antes de la maniobra para avisar a los demás usuarios."],
+["normas","El pito o bocina del vehículo debe usarse:","Solo para prevenir un accidente o advertir un peligro","Para saludar o apurar a otros conductores","Siempre en los cruces","Cuando hay trancón","El uso innecesario o excesivo del pito es una infracción y genera contaminación auditiva."],
+["normas","En carretera oscura y sin vehículos al frente, usted puede usar luces:","Altas, y cambiarlas a bajas al cruzarse con otro vehículo","Siempre luces altas aunque venga otro vehículo","Solo las de parqueo","Ninguna","Las luces altas se usan donde no encandilan; al cruzarse con otro vehículo se pasa a luces bajas."],
+["normas","Al llegar a un cruce con vía férrea, el conductor debe:","Reducir, detenerse si es necesario, mirar y cruzar solo si no viene el tren","Cruzar rápido antes de que pase el tren","Detenerse sobre los rieles para observar","Usar el pito y pasar","El tren siempre tiene prelación y nunca se debe detener el vehículo sobre los rieles."],
+["normas","Ante una señal de PARE usted debe:","Detener completamente el vehículo antes de la línea de pare","Reducir la velocidad solamente","Pasar si no vienen vehículos sin detenerse","Pitar y continuar","PARE exige detención total, aunque no haya otros vehículos, y luego avanzar cuando sea seguro."],
+["normas","Ante una señal de CEDA EL PASO usted debe:","Reducir la velocidad y dar paso a los vehículos de la vía principal","Detenerse siempre por completo","Pasar con prelación","Acelerar para incorporarse","Se cede el paso a quienes circulan por la vía que se cruza, deteniéndose solo si es necesario."],
+["normas","La marcha atrás (reversa) debe hacerse:","Solo cuando sea seguro y por la distancia mínima necesaria","En cualquier vía y a cualquier distancia","En autopistas si se pasó la salida","Siempre sin mirar atrás si hay espejos","La reversa es una maniobra riesgosa; se hace despacio y verificando que no haya peatones ni vehículos."],
+["normas","Al adelantar a un ciclista, el conductor debe dejar una distancia lateral de al menos:","1,5 metros","50 centímetros","1 metro","No hay distancia mínima","La ley exige mantener 1,5 m de separación lateral al sobrepasar bicicletas."],
+["normas","El casco de seguridad en motocicleta es obligatorio para:","El conductor y el acompañante","Solo el conductor","Solo en carreteras","Solo en la noche","Tanto el conductor como el parrillero deben usar casco debidamente ajustado y certificado."],
+["normas","Conducir y usar el celular en la mano:","Está prohibido; solo se permite con manos libres","Está permitido en trancones","Es válido si es una llamada corta","Se permite a baja velocidad","Usar el celular sin manos libres mientras se conduce es infracción y una causa frecuente de accidentes."],
+["normas","El cinturón de seguridad es obligatorio para:","El conductor y todos los pasajeros","Solo el conductor","Solo los que van adelante","Solo en carretera","En Colombia deben usarlo todos los ocupantes del vehículo, en ciudad y en carretera."],
+["normas","Como regla general, los menores de 10 años deben viajar en:","El asiento trasero, con la protección adecuada","El asiento delantero con el cinturón","Cargados por un adulto adelante","Cualquier asiento","Los niños pequeños viajan atrás y con sistema de retención o cinturón adecuados a su talla."],
+["normas","Se debe estacionar el vehículo:","Lo más cerca posible del andén, en el sentido de la marcha","En el centro de la calzada","En contravía junto al andén","En doble fila si es por poco tiempo","Se estaciona a la derecha, junto al andén y en el sentido de circulación, donde esté permitido."],
+["normas","Para girar a la izquierda en una intersección, el conductor debe:","Señalizar, ubicarse en el carril correcto y ceder el paso a los vehículos que vienen de frente","Girar desde cualquier carril","Cruzar rápido para evitar a otros","Pitar y girar","El giro a la izquierda corta el tráfico contrario; por eso se hace con señal y cediendo el paso."],
+["normas","Si ocurre un choque solo con daños materiales y sin heridos, los conductores deben:","Retirar los vehículos de la vía para no obstruir el tránsito","Dejar los vehículos en el lugar hasta que llegue la policía","Huir del lugar","Bloquear la vía como evidencia","Cuando solo hay daños, se debe despejar la vía y hacer el acuerdo o el reporte correspondiente."],
+["normas","Ante un accidente con heridos usted debe:","Llamar a la línea de emergencias 123 y no mover al herido salvo que haya peligro","Mover al herido de inmediato","Irse para evitar problemas","Dar líquidos al herido","Se pide ayuda al 123 y no se mueve al lesionado, salvo riesgo inminente, para evitar agravar lesiones."],
+["normas","La distancia de seguridad con el vehículo de adelante debe ser:","La suficiente para poder frenar sin chocar","La menor posible para no dejar que se meta otro","Igual en todas las velocidades","Solo la mitad de la longitud del carro","A mayor velocidad o peor clima, mayor distancia necesaria."],
+["normas","En una zona escolar el conductor debe:","Reducir la velocidad y estar atento a los niños","Mantener la velocidad normal","Usar el pito para avisar","Adelantar a los buses escolares","Los escolares son usuarios vulnerables; la prudencia y la baja velocidad son obligatorias."],
+["normas","Un peatón debe cruzar la calle:","Por los cruces peatonales, puentes o esquinas con semáforo","Por cualquier parte de la calzada","Corriendo entre los carros","Por la mitad de la cuadra","Los peatones deben cruzar por los lugares señalizados y respetar el semáforo peatonal."],
+["normas","Al llegar a una intersección con semáforo en verde, pero con la vía de salida congestionada, usted debe:","No ingresar a la intersección si va a quedar bloqueándola","Entrar para pasar de todas formas","Pitar para que despejen","Pasar con luces de parqueo","Bloquear la intersección impide el paso de los demás y está prohibido."],
+["normas","Los vehículos de servicio público de pasajeros deben recoger y dejar usuarios:","En los paraderos o zonas habilitadas","En cualquier esquina","En medio de la vía","Donde pida el pasajero","El ascenso y descenso se hace en los sitios autorizados para no poner en riesgo a nadie."],
+["normas","En una intersección sin semáforo ni señales, la actitud correcta es:","Reducir la velocidad, mirar a ambos lados y ceder si hay duda","Pasar sin mirar si se va rápido","Pitar y pasar","Acelerar para ganarle al otro","Se debe llegar con velocidad que permita detenerse y evitar conflictos."],
+["normas","Si el semáforo no funciona y hay un agente de tránsito dirigiendo, usted debe:","Obedecer las indicaciones del agente","Ignorarlo y seguir el semáforo","Guiarse por los demás conductores","Pasar con precaución sin parar","Las señales de un agente de tránsito prevalecen sobre semáforos y demás señales."],
+
+/* ---------- LICENCIAS, DOCUMENTOS Y SANCIONES ---------- */
+["documentos","¿Qué norma contiene el Código Nacional de Tránsito Terrestre de Colombia?","Ley 769 de 2002","Ley 100 de 1993","Ley 1098 de 2006","Ley 599 de 2000","La Ley 769 de 2002 es el Código Nacional de Tránsito Terrestre, con sus modificaciones posteriores."],
+["documentos","Los documentos que debe portar el conductor de un vehículo particular incluyen:","Licencia de conducción, licencia de tránsito, SOAT y revisión técnico-mecánica vigentes","Solo la cédula","Solo el SOAT","Solo el pase y el seguro de vida","Se exigen los documentos del conductor y del vehículo; algunos pueden verificarse en línea (RUNT)."],
+["documentos","El SOAT es:","El Seguro Obligatorio de Accidentes de Tránsito","Un seguro opcional contra robo","Un impuesto municipal","El permiso para circular por las vías","El SOAT cubre la atención médica y otros gastos de las víctimas de un accidente de tránsito."],
+["documentos","La vigencia del SOAT es de:","Un año","Seis meses","Dos años","Cinco años","El SOAT se renueva cada año y circular sin él es infracción."],
+["documentos","La revisión técnico-mecánica y de emisiones contaminantes verifica:","El estado mecánico, de seguridad y ambiental del vehículo","Solo la pintura del carro","Que el conductor tenga licencia","El valor comercial del vehículo","Busca que el vehículo sea seguro y no contamine por encima de lo permitido."],
+["documentos","La licencia de tránsito (tarjeta de propiedad) es:","El documento que identifica al vehículo y a su propietario","La autorización para conducir","El seguro del vehículo","El permiso para parquear","Acredita la propiedad y las características del vehículo."],
+["documentos","La licencia de conducción categoría A1 autoriza a conducir:","Motocicletas de hasta 125 cc","Automóviles particulares","Buses de servicio público","Vehículos articulados","A1 es para motos de baja cilindrada (hasta 125 cc); A2 para las de mayor cilindrada."],
+["documentos","La categoría A2 de la licencia de conducción corresponde a:","Motocicletas de más de 125 cc","Camiones","Automóviles y camionetas","Bicicletas eléctricas","A2 habilita la conducción de motocicletas con cilindrada superior a 125 cc."],
+["documentos","La categoría B1 de la licencia de conducción es para:","Automóviles, camperos y camionetas de servicio particular","Motocicletas","Buses y busetas","Tractocamiones","B1 es la categoría típica de vehículos particulares livianos."],
+["documentos","Para conducir vehículos de servicio público de pasajeros o de carga se requiere licencia de categoría:","C (C1, C2 o C3, según el vehículo)","A1","B1","Cualquiera","Las categorías C corresponden a vehículos de servicio público."],
+["documentos","La edad mínima para obtener la licencia de conducción de automóvil particular (B1) es:","18 años","16 años","15 años","21 años","Para las categorías de automóvil se exige ser mayor de edad (18 años)."],
+["documentos","Para obtener la licencia de conducción por primera vez se requiere, entre otros:","Aprobar los exámenes teórico y práctico y el certificado médico de aptitud","Solo pagar el trámite","Tener vehículo propio","Solo el curso de manejo","Se debe acreditar capacidad física, mental y de coordinación motriz, además de aprobar las pruebas."],
+["documentos","El RUNT es:","El Registro Único Nacional de Tránsito","Un seguro obligatorio","Una multa de tránsito","El examen de conducción","Allí se consulta información de conductores, vehículos, licencias, SOAT y revisiones."],
+["documentos","Un comparendo es:","La orden formal de notificación por una presunta infracción de tránsito","Un permiso especial para circular","El carné de conductor","Un tipo de seguro","El comparendo notifica al presunto infractor para que comparezca ante la autoridad de tránsito."],
+["documentos","Conducir en estado de embriaguez puede acarrear:","Multa, suspensión o cancelación de la licencia e inmovilización del vehículo","Solo una llamada de atención","Un descuento en el seguro","Nada si no hay accidente","Las sanciones por conducir bajo efectos del alcohol son severas y crecen con la reincidencia."],
+["documentos","¿Cuál es el número de la línea única de emergencias en Colombia?","123","911","112","190","El 123 articula la atención de policía, bomberos, ambulancias y otras emergencias."],
+["documentos","Las placas del vehículo deben:","Estar visibles, legibles y sin alteraciones","Poder taparse si llueve","Cambiarse por las que prefiera el dueño","Llevarse solo en la parte de atrás sin importar el estado","Alterar, ocultar o tapar la placa es infracción."],
+["documentos","Si su vehículo es inmovilizado por una infracción, esto significa que:","Debe ser retirado de circulación y llevado a un patio o dejado según indique la autoridad","Puede seguir circulando con cuidado","Solo se le pone una calcomanía","Se pierde la propiedad del vehículo","La inmovilización impide la circulación hasta que se subsane la causa y se cumpla el procedimiento."],
+["documentos","La suspensión de la licencia de conducción implica:","Que no puede conducir durante el periodo de la sanción","Que solo puede conducir de noche","Que puede conducir cualquier vehículo menos moto","Que debe pagar un seguro adicional","Durante la suspensión se pierde temporalmente el derecho de conducir."],
+["documentos","La cancelación de la licencia de conducción significa:","Que se pierde la licencia y se debe tramitar de nuevo cumpliendo requisitos","Que se aplaza un año","Que se cambia por otra categoría","Que no pasa nada","La cancelación es una sanción grave: termina la habilitación para conducir."],
+["documentos","La revisión técnico-mecánica de un vehículo particular debe hacerse, después de la primera:","Una vez al año","Cada cinco años","Cada dos meses","Una sola vez en la vida","Tras la primera revisión, se repite anualmente para mantener la vigencia."],
+["documentos","El traspaso de un vehículo se hace:","Ante el organismo de tránsito, para registrar el cambio de propietario","Solo con un papel entre las partes","Con el pago del SOAT","En el banco","El traspaso formaliza el cambio de dueño en el registro oficial."],
+["documentos","Los centros de reconocimiento de conductores (CRC) expiden:","El certificado de aptitud física, mental y de coordinación motriz","La licencia de conducción","La licencia de tránsito","El SOAT","Este certificado es requisito para obtener o renovar la licencia."],
+["documentos","Ser pillado sin SOAT vigente implica:","Una infracción con multa e inmovilización del vehículo","Nada si es un vehículo viejo","Solo una advertencia verbal","Una multa solo para taxis","Circular sin SOAT es una infracción que puede llevar a la inmovilización."],
+["documentos","¿Qué es el 'pico y placa'?","Una medida local de restricción de circulación según el último dígito de la placa","Un tipo de seguro","Un curso para conductores","Un impuesto vehicular","Es una medida de movilidad de cada ciudad; las reglas varían por municipio."],
+["documentos","Las infracciones de tránsito se clasifican en:","Contravenciones y sanciones graduadas según su gravedad","Solo una clase única","Solo las cometidas de noche","Solo las de motos","El Código define tipos de infracción con multas e inmovilización según gravedad."],
+["documentos","Un conductor que cometa una infracción puede, en algunos casos, reducir su multa:","Tomando un curso pedagógico en un centro autorizado y pagando dentro de los plazos","Ignorando el comparendo","Pagando más tarde sin explicaciones","Cambiando la placa","Los descuentos dependen de cumplir el curso y los plazos legales de pago."],
+["documentos","La licencia de conducción es:","Personal e intransferible","Transferible a un familiar","Válida para cualquier conductor","Opcional si se maneja despacio","Solo la persona a nombre de la cual está expedida puede usarla."],
+["documentos","Una persona con licencia vencida que conduce:","Comete una infracción y puede ser sancionada","Puede conducir normalmente","Tiene un mes de gracia automático","Solo es sancionada en carretera","La licencia debe estar vigente al momento de conducir."],
+["documentos","El certificado de revisión técnico-mecánica vigente se exige para:","La circulación de los vehículos que deben cumplirla","Solo los vehículos viejos","Solo los de servicio público","Ninguno","Los vehículos obligados deben acreditarla vigente para circular."],
+
+/* ---------- CONDUCCIÓN SEGURA Y MECÁNICA ---------- */
+["seguridad","Antes de arrancar el vehículo, usted debe:","Ajustar asiento, espejos y cinturón","Encender la radio","Arrancar y ajustar en marcha","Poner las luces altas","Una posición correcta y buena visibilidad evitan errores y lesiones."],
+["seguridad","La cantidad de alcohol que es seguro consumir antes de conducir es:","Ninguna: si va a manejar, no debe beber","Una cerveza","Dos copas con comida","Depende de lo grande que sea","El alcohol reduce reflejos y percepción incluso en cantidades pequeñas."],
+["seguridad","Si siente sueño o fatiga mientras conduce, lo mejor es:","Detenerse en un lugar seguro y descansar","Abrir la ventana y seguir","Subir el volumen de la música","Acelerar para llegar rápido","La fatiga reduce la atención como el alcohol; en viajes largos conviene parar cada cierto tiempo."],
+["seguridad","Cuando la calzada está mojada, la distancia de frenado:","Aumenta, por lo que se debe reducir la velocidad","Disminuye","Se mantiene igual","No depende del clima","El pavimento mojado reduce el agarre de las llantas."],
+["seguridad","Si el vehículo patina por hidroplaneo (aquaplaning), usted debe:","Soltar el acelerador y no frenar bruscamente, manteniendo el volante firme","Frenar a fondo","Girar con fuerza el volante","Acelerar para recuperar tracción","Maniobras bruscas empeoran la pérdida de control; se deja que las llantas recuperen el agarre."],
+["seguridad","Con niebla densa se recomienda:","Reducir la velocidad y usar luces bajas o antiniebla","Usar luces altas","Apagar las luces","Aumentar la velocidad para salir rápido","Las luces altas se reflejan en la niebla y reducen aún más la visibilidad."],
+["seguridad","La presión de las llantas debe:","Revisarse periódicamente según la recomendación del fabricante","Ser siempre la máxima","Revisarse solo si se pinchan","Ser la misma para todos los vehículos","Una presión incorrecta afecta frenado, consumo y desgaste."],
+["seguridad","Si se enciende la luz roja de presión de aceite en el tablero, usted debe:","Detener el motor lo antes posible en un lugar seguro","Seguir hasta llegar","Echarle agua","Ignorarla si el carro suena bien","Sin lubricación el motor se puede dañar en minutos."],
+["seguridad","Si el indicador de temperatura del motor marca excesivo calor, usted debe:","Detenerse, apagar el motor y esperar a que se enfríe antes de abrir la tapa del radiador","Abrir de inmediato el radiador","Seguir hasta el taller","Echar agua fría al motor caliente","Abrir un radiador caliente puede causar quemaduras graves."],
+["seguridad","La luz de batería encendida en el tablero indica un problema con:","El sistema de carga eléctrica (batería o alternador)","El nivel de combustible","El aceite","Las llantas","Es una alerta del sistema eléctrico que conviene revisar cuanto antes."],
+["seguridad","Si se revienta una llanta en marcha, usted debe:","Sostener firme el volante, soltar el acelerador y frenar suavemente","Frenar de golpe","Girar el volante con fuerza","Acelerar","Mantener la trayectoria y reducir gradualmente evita perder el control."],
+["seguridad","Al bajar una pendiente larga, lo recomendable es:","Usar un cambio bajo (freno motor) y frenar en forma controlada","Ir en neutro para ahorrar combustible","Mantener el pie pisando el freno todo el tiempo","Apagar el motor","El freno motor evita recalentar los frenos."],
+["seguridad","Si hay una falla del vehículo en carretera, usted debe:","Orillarse, encender las luces de parqueo y colocar las señales de emergencia","Detenerse en el carril","Salir y revisar en la mitad de la vía","Seguir con el vehículo dañado","Hay que hacerse visible y proteger a los demás usuarios de la vía."],
+["seguridad","El kit de carretera obligatorio incluye elementos como:","Extintor, botiquín, señales de emergencia, gato, cruceta, linterna y herramientas","Solo una linterna","Un radio y un GPS","Ninguno es obligatorio","Estos elementos permiten atender una emergencia o un cambio de llanta."],
+["seguridad","Los apoyacabezas (reposacabezas) sirven para:","Proteger el cuello en caso de impacto","Descansar la cabeza en trancones","Adorno","Sostener la cabina","Bien ajustados reducen lesiones en el cuello (latigazo) en colisiones."],
+["seguridad","El airbag:","Complementa al cinturón de seguridad, no lo reemplaza","Reemplaza el cinturón","Solo funciona sin cinturón","No protege en choques frontales","El airbag protege mejor cuando el ocupante lleva el cinturón puesto."],
+["seguridad","Al conducir de noche se recomienda:","Reducir la velocidad y no mirar directamente las luces que vienen de frente","Aumentar la velocidad","Mirar de frente a las luces altas","Apagar las luces del tablero y de la cabina","Se guía la vista hacia el borde derecho de la vía para evitar el encandilamiento."],
+["seguridad","Los puntos ciegos de un vehículo son:","Zonas que los espejos no muestran y que hay que revisar girando la cabeza","Las partes dañadas","Los rincones del baúl","Los que se ven en el espejo retrovisor","Antes de cambiar de carril se debe mirar el punto ciego, además de usar los espejos."],
+["seguridad","Los usuarios más vulnerables de la vía son:","Peatones, ciclistas y motociclistas","Los conductores de camiones","Los taxistas","Los conductores de buses","Tienen menos protección física, así que se debe extremar el cuidado a su alrededor."],
+["seguridad","Para estacionar en una pendiente descendente con andén, debe:","Poner el freno de mano y girar las ruedas delanteras hacia el andén","Dejar las ruedas rectas","Estacionar sin freno de mano","Dejar el carro en neutro","Así, si el vehículo se desliza, las ruedas lo detienen contra el andén."],
+["seguridad","Una conducción eficiente (ecológica) busca:","Acelerar y frenar suavemente y anticipar el tráfico","Acelerar con fuerza y frenar de golpe","Mantener el motor siempre revolucionado","Usar siempre el cambio más bajo","Conducir con suavidad ahorra combustible y reduce el riesgo de accidentes."],
+["seguridad","Mantener el pie apoyado en el pedal del embrague mientras se conduce:","Desgasta el sistema y reduce el control del vehículo","Es recomendable","No tiene efecto","Ahorra combustible","El pie debe estar en el reposapié cuando no se necesita pisar el pedal."],
+["seguridad","La distracción al conducir (celular, comer, buscar objetos) puede:","Retrasar la reacción y causar accidentes","No afectar si es breve","Mejorar la concentración","Ser compensada por la velocidad","Quitar la vista de la vía incluso un segundo equivale a recorrer varios metros sin control."],
+["seguridad","El líquido de frenos debe revisarse porque:","Un nivel bajo puede indicar fugas o desgaste y comprometer el frenado","Solo es de adorno","Se usa para limpiar los vidrios","Es el combustible del carro","Los frenos son un sistema de seguridad crítico."],
+["seguridad","El aceite del motor sirve para:","Lubricar las partes móviles del motor","Enfriar el aire acondicionado","Mover la caja de cambios","Limpiar el parabrisas","Sin aceite suficiente el motor se desgasta y puede fundirse."],
+["seguridad","El refrigerante del motor sirve para:","Evitar el sobrecalentamiento del motor","Lubricar los frenos","Aumentar la potencia","Limpiar la gasolina","Mantiene la temperatura de operación del motor."],
+["seguridad","Si los frenos fallan, una acción recomendable es:","Bajar los cambios, usar el freno de mano progresivamente y buscar una salida segura","Apagar el motor y soltar el volante","Acelerar para frenar con el motor","Usar el pito y seguir","Se usa el freno motor y el freno de emergencia con cuidado para no bloquear las ruedas."],
+["seguridad","Al conducir bajo lluvia, usted debe:","Reducir la velocidad, aumentar la distancia y usar luces bajas","Mantener la velocidad normal","Usar luces altas","Seguir muy cerca del vehículo de adelante","La lluvia reduce visibilidad y agarre; se necesita más distancia para frenar."],
+["seguridad","La posición correcta de las manos en el volante es:","A los lados, a las 9 y las 3 (o 10 y 2)","Con una sola mano en la parte inferior","Cruzadas","Apoyadas en el centro","Permite girar y reaccionar con control en cualquier maniobra."],
+["seguridad","Las motocicletas deben circular:","Con las luces encendidas, casco ajustado y respetando los carriles","Entre carriles y por los andenes","Sin luces de día","Con tres pasajeros","El motociclista debe ser visible y seguir las mismas normas que los demás vehículos."],
+["seguridad","Para evitar accidentes en una curva usted debe:","Reducir la velocidad antes de entrar y mantenerse en su carril","Frenar dentro de la curva con fuerza","Cortar la curva hacia el otro carril","Acelerar al máximo","Se baja la velocidad antes de la curva para mantener el control y evitar invadir el carril contrario."],
+["seguridad","Después de un frenado de emergencia con ABS usted debe:","Mantener el pedal firme y dirigir el vehículo","Soltar y volver a pisar el freno rápidamente","Apagar el motor","Subir el cambio","El ABS evita que las ruedas se bloqueen; el pedal puede vibrar, es normal y no se debe soltar."],
+["seguridad","Si la luz del freno de mano o del sistema de frenos sigue encendida en el tablero, debe:","Revisar si el freno de mano está liberado y el nivel de líquido de frenos","Ignorarla","Seguir conduciendo hasta que se apague","Apagarla con un fusible","Puede indicar el freno aplicado o un problema real en el sistema de frenos."],
+["seguridad","El conductor designado (el que no bebe) es una práctica para:","Llevar con seguridad a quienes han bebido, sin riesgo","Evitar pagar un taxi","Presumir","Reemplazar al alcoholímetro","Es una estrategia para evitar que quien consumió alcohol conduzca."],
+["seguridad","Cuando se transporta carga en un vehículo, esta debe:","Estar bien asegurada y no sobresalir de forma peligrosa","Ir suelta para que no se dañe","Tapar las luces y la placa","Ir sobre el techo sin amarrar","La carga mal asegurada puede caerse y causar accidentes."]
+];
+
+/* ============================================================
+   BANCO UNIFICADO (250 preguntas = señales + inversas + texto)
+   ============================================================ */
+const SIGNS = SIGNS_RAW.trim().split("\n").map(l=>{
+  const [code,meaning]=l.split("|"); const g = code.startsWith("SP")?"P":code.startsWith("SI")?"I":"R";
+  return {code,meaning,g};
+});
+const BANK = (()=>{
+  const out=[];
+  SIGNS.forEach(s=>out.push({id:"S:"+s.code,kind:"sign",cat:GROUPS[s.g].cat,s}));
+  const need = CONFIG.TOTAL_BANK - SIGNS.length - TEXT_RAW.length;
+  const step = SIGNS.length/Math.max(need,1);
+  for(let i=0;i<need;i++){ const s=SIGNS[Math.min(SIGNS.length-1,Math.floor(i*step+step/2))]; out.push({id:"R:"+s.code,kind:"rev",cat:GROUPS[s.g].cat,s}); }
+  TEXT_RAW.forEach((t,i)=>out.push({id:"T:"+i,kind:"text",cat:t[0],t}));
+  return out;
+})();
+const BY_ID = Object.fromEntries(BANK.map(q=>[q.id,q]));
+const isSignQ = q => q.kind!=="text";
+
+/* ============================================================
+   UTILIDADES
+   ============================================================ */
+const $ = (s,r=document)=>r.querySelector(s);
+const shuffle = a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const imgUrl = (code,w)=>CONFIG.IMG_BASE+CONFIG.IMG_PREFIX+code+".svg?width="+w;
+const fmt = s=>{s=Math.max(0,Math.round(s));return String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0")};
+const esc = s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+/* Almacenamiento (con respaldo en memoria si el navegador lo bloquea) */
+const mem={};
+const store={
+  get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return k in mem?mem[k]:d}},
+  set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){mem[k]=v}}
+};
+const getFails=()=>store.get("sc_fails",[]).filter(id=>BY_ID[id]);
+const setFails=a=>store.set("sc_fails",[...new Set(a)]);
+const getHist=()=>store.get("sc_hist",[]);
+const pushHist=h=>{const a=getHist();a.unshift(h);store.set("sc_hist",a.slice(0,30))};
+
+/* ============================================================
+   SONIDOS (Web Audio, sin archivos)
+   ============================================================ */
+let AC=null, muted=store.get("sc_muted",false);
+function ctx(){ if(!AC){try{AC=new (window.AudioContext||window.webkitAudioContext)()}catch(e){}} if(AC&&AC.state==="suspended")AC.resume(); return AC }
+function tone(f,t0,d,type="sine",g=.16,slide){
+  const c=ctx(); if(!c||muted)return;
+  const o=c.createOscillator(), v=c.createGain(), t=c.currentTime+t0;
+  o.type=type; o.frequency.setValueAtTime(f,t); if(slide)o.frequency.exponentialRampToValueAtTime(slide,t+d);
+  v.gain.setValueAtTime(0.0001,t); v.gain.exponentialRampToValueAtTime(g,t+.015); v.gain.exponentialRampToValueAtTime(0.0001,t+d);
+  o.connect(v).connect(c.destination); o.start(t); o.stop(t+d+.05);
+}
+const sfx={
+  click(){tone(620,0,.05,"triangle",.07)},
+  ok(){tone(880,0,.14,"triangle",.14);tone(1318,.09,.32,"triangle",.14);tone(2637,.09,.25,"sine",.03)},        // campanita ascendente
+  bad(){tone(240,0,.16,"square",.07,170);tone(160,.14,.3,"square",.07,110)},                                      // zumbido grave descendente
+  tick(){tone(1000,0,.04,"square",.04)},
+  win(){[523,659,784,1047].forEach((f,i)=>tone(f,i*.11,.28,"triangle",.13))},
+  lose(){[392,349,311].forEach((f,i)=>tone(f,i*.16,.3,"triangle",.1))},
+  pick(){tone(520,0,.06,"sine",.09)}
+};
+
+/* ============================================================
+   IMÁGENES: precarga con tiempo límite y registro de fallos
+   ============================================================ */
+const imgState={}; // clave url -> true/false
+function preload(url){
+  if(url in imgState) return Promise.resolve(imgState[url]);
+  return new Promise(res=>{
+    const im=new Image(); let done=false;
+    const fin=ok=>{if(done)return;done=true;imgState[url]=ok;res(ok)};
+    im.onload=()=>fin(true); im.onerror=()=>fin(false);
+    im.referrerPolicy="no-referrer"; im.src=url;
+    setTimeout(()=>fin(false),CONFIG.IMG_TIMEOUT);
+  });
+}
+
+/* ============================================================
+   CONSTRUCCIÓN DE UNA PREGUNTA PRESENTABLE
+   ============================================================ */
+function build(q){
+  if(q.kind==="sign"){
+    const same=SIGNS.filter(x=>x.g===q.s.g && x.meaning!==q.s.meaning);
+    const wrong=shuffle(same).slice(0,3);
+    const opts=shuffle([{t:q.s.meaning,ok:true},...wrong.map(w=>({t:w.meaning,ok:false}))]);
+    return {q,cat:q.cat,prompt:"¿Qué significa esta señal?",img:imgUrl(q.s.code,460),code:q.s.code,opts,
+      exp:q.s.code+" · "+q.s.meaning+". "+GROUPS[q.s.g].tip,
+      imgs:[imgUrl(q.s.code,460)]};
+  }
+  if(q.kind==="rev"){
+    const same=SIGNS.filter(x=>x.g===q.s.g && x.code!==q.s.code && x.meaning!==q.s.meaning);
+    const wrong=shuffle(same).slice(0,3);
+    const opts=shuffle([{img:imgUrl(q.s.code,300),code:q.s.code,ok:true},...wrong.map(w=>({img:imgUrl(w.code,300),code:w.code,ok:false}))]);
+    return {q,cat:q.cat,prompt:"¿Cuál de estas señales indica: «"+q.s.meaning+"»?",opts,
+      exp:q.s.code+" · "+q.s.meaning+". "+GROUPS[q.s.g].tip,imgs:opts.map(o=>o.img)};
+  }
+  const [cat,txt,right,w1,w2,w3,exp]=q.t;
+  return {q,cat,prompt:txt,opts:shuffle([{t:right,ok:true},{t:w1,ok:false},{t:w2,ok:false},{t:w3,ok:false}]),exp,imgs:[]};
+}
+
+/* ============================================================
+   SESIÓN
+   ============================================================ */
+let S=null, timerId=null, offlineWarned=false;
+const app=$("#app");
+
+function weightedQueue(n,share){
+  const signs=shuffle(BANK.filter(isSignQ)), texts=shuffle(BANK.filter(q=>!isSignQ(q)));
+  const ns=Math.round(n*share), out=[];
+  for(let i=0;i<n;i++){
+    const wantSign=i<ns;
+    out.push(wantSign?signs[i%signs.length]:texts[(i-ns)%texts.length]);
+  }
+  return shuffle(out).map(q=>q.id);
+}
+function miniQueue(){
+  // intercala señales y texto con la proporción pedida
+  const s=shuffle(BANK.filter(isSignQ)), t=shuffle(BANK.filter(q=>!isSignQ(q))); const out=[]; let i=0,j=0;
+  while(i<s.length||j<t.length){
+    const r=Math.random();
+    if((r<CONFIG.MINI_SIGN_SHARE&&i<s.length)||j>=t.length) out.push(s[i++]); else out.push(t[j++]);
+  }
+  return out.map(q=>q.id);
+}
+
+function start(mode,opt={}){
+  ctx(); sfx.click(); stopTimer();
+  S={mode,idx:0,ok:0,total:0,wrong:[],log:[],t0:Date.now(),locked:false,cur:null,skipped:0,textOnly:false,queue:[],limit:0,deadline:0};
+  if(mode==="mini"){S.limit=opt.minutes*60;S.queue=miniQueue();S.deadline=Date.now()+S.limit*1000;}
+  if(mode==="exam"){S.limit=CONFIG.EXAM_MINUTES*60;S.queue=weightedQueue(CONFIG.EXAM_QUESTIONS,CONFIG.EXAM_SIGN_SHARE);S.deadline=Date.now()+S.limit*1000;S.n=CONFIG.EXAM_QUESTIONS;}
+  if(mode==="cat"){S.cat=opt.cat;S.queue=shuffle(BANK.filter(q=>q.cat===opt.cat)).slice(0,CONFIG.PRACTICE_LEN).map(q=>q.id);S.n=S.queue.length;}
+  if(mode==="review"){S.queue=shuffle(getFails());S.n=S.queue.length;}
+  if(!S.queue.length){home();return}
+  app.innerHTML='<div class="loading">Preparando preguntas…</div>';
+  nextQ(); if(S.deadline) timerId=setInterval(tickTimer,250);
+}
+function stopTimer(){clearInterval(timerId);timerId=null}
+function tickTimer(){
+  if(!S){stopTimer();return}
+  const left=(S.deadline-Date.now())/1000, el=$("#timer");
+  if(el){el.textContent=fmt(left);const low=left<=10;el.classList.toggle("low",low);
+    const sec=Math.ceil(left); if(low&&left>0&&S._lastTick!==sec){S._lastTick=sec;sfx.tick()}}
+  if(left<=0){finish(true)}
+}
+
+async function nextQ(){
+  if(!S)return;
+  const mySession=S;
+  while(true){
+    if(!S.queue.length){
+      if(S.mode==="mini"){S.queue=miniQueue()} else {finish(false);return}
+    }
+    if(S.mode!=="mini"&&S.mode!=="exam"||S.mode==="exam"){/* nada */}
+    const q=BY_ID[S.queue.shift()];
+    if(S.textOnly&&isSignQ(q)) continue;
+    const p=build(q);
+    if(p.imgs.length){
+      const slow=setTimeout(()=>{if(S===mySession&&!S.cur)app.innerHTML='<div class="loading">Cargando señal…</div>'},350);
+      const oks=await Promise.all(p.imgs.map(preload));
+      clearTimeout(slow);
+      if(S!==mySession)return;
+      if(!oks.every(Boolean)){
+        S.skipped++;
+        if(S.skipped>=6&&!S.textOnly){S.textOnly=true;S.offline=true;}
+        continue;
+      }
+    }
+    S.cur=p;S.locked=false;S.chosen=null;
+    render();
+    // precarga de la siguiente
+    const nx=BY_ID[S.queue[0]]; if(nx&&isSignQ(nx)){build(nx).imgs.forEach(preload)}
+    return;
+  }
+}
+
+function render(){
+  const p=S.cur, exam=S.mode==="exam";
+  const total=S.n||null;
+  const num=S.idx+1;
+  const progress= total? (S.idx/total*100) : Math.min(100,(Date.now()-S.t0)/1000/S.limit*100);
+  const letters=["A","B","C","D"];
+  const imgMode=p.opts[0].img;
+  app.innerHTML=`
+    <div class="qtop">
+      <button class="icon" id="exit" aria-label="Salir">✕</button>
+      <span class="count">${total?`Pregunta ${num} de ${total}`:`Pregunta ${num} · ${S.ok} ✓`}</span>
+      <span class="sp"></span>
+      ${S.deadline?`<span class="timer" id="timer">${fmt((S.deadline-Date.now())/1000)}</span>`:""}
+      <button class="icon" id="mute" aria-label="Sonido">${muted?"🔇":"🔔"}</button>
+    </div>
+    <div class="bar"><i style="width:${progress}%"></i></div>
+    ${S.offline&&!offlineWarned?'<div class="notice">Algunas señales no cargaron (¿sin internet?). Se mostrarán solo preguntas de texto.</div>':''}
+    <section class="card" id="card">
+      <div class="cat">${esc(CATS[p.cat]||p.cat)}</div>
+      ${p.img?`<div class="sign"><img src="${p.img}" alt="Señal de tránsito" referrerpolicy="no-referrer" onload="this.classList.add('in')"><span class="code">${esc(p.code)}</span></div>`:""}
+      <h2 class="q">${esc(p.prompt)}</h2>
+      <div class="opts ${imgMode?"imgopts":""}">
+        ${p.opts.map((o,i)=>`<button class="opt" data-i="${i}"><span class="k">${letters[i]}</span>${o.img?`<img src="${o.img}" alt="Opción ${letters[i]}" referrerpolicy="no-referrer" onload="this.classList.add('in')">`:`<span>${esc(o.t)}</span>`}</button>`).join("")}
+      </div>
+      <div class="pop" id="pop"></div>
+      <div class="fb" id="fb" role="status" aria-live="polite"></div>
+      <div class="next" id="nextwrap" style="display:none"><button class="btn" id="next"></button></div>
+    </section>`;
+  if(S.offline)offlineWarned=true;
+}
+
+function choose(i){
+  if(!S||!S.cur||S.locked)return;
+  const p=S.cur, exam=S.mode==="exam", o=p.opts[i];
+  const card=$("#card"), btns=[...document.querySelectorAll(".opt")];
+  if(exam){
+    // en el simulacro se puede cambiar la respuesta antes de continuar
+    S.chosen=i; sfx.pick();
+    btns.forEach((b,k)=>b.classList.toggle("sel",k===i));
+    const w=$("#nextwrap"); w.style.display="flex";
+    const last=S.idx+1>=S.n; const nb=$("#next"); nb.textContent=last?"Finalizar":"Siguiente →";
+    return;
+  }
+  S.locked=true; S.total++;
+  const right=p.opts.findIndex(x=>x.ok);
+  card.classList.add("reveal");
+  btns.forEach((b,k)=>{b.classList.add(k===right?"ok":(k===i?"no":"dim"))});
+  const pop=$("#pop"), fb=$("#fb");
+  if(o.ok){
+    S.ok++; sfx.ok(); pop.textContent="✅"; fb.className="fb show good";
+    fb.innerHTML=`<strong>¡Correcto!</strong><p>${esc(p.exp)}</p>`;
+    if(S.mode==="review") setFails(getFails().filter(id=>id!==p.q.id));
+  } else {
+    sfx.bad(); pop.textContent="❌"; fb.className="fb show bad"; card.classList.add("shake");
+    const ans=p.opts[right]; const txt=ans.t||("la señal "+ans.code);
+    fb.innerHTML=`<strong>Incorrecto</strong><p>Respuesta correcta: <b>${esc(txt)}</b>.<br>${esc(p.exp)}</p>`;
+    S.wrong.push({p,chosen:o}); setFails([...getFails(),p.q.id]);
+  }
+  pop.classList.remove("go"); void pop.offsetWidth; pop.classList.add("go");
+  S.log.push({id:p.q.id,ok:o.ok});
+  const last = S.n && S.idx+1>=S.n;
+  const nb=$("#next"); nb.textContent=last?"Ver resultados":"Siguiente →"; $("#nextwrap").style.display="flex";
+  if(S.mode==="mini"&&o.ok){ S._auto=setTimeout(()=>{if(S&&S.cur===p)advance()},1000); }
+}
+
+function advance(){
+  if(!S||!S.cur)return;
+  clearTimeout(S._auto);
+  const p=S.cur;
+  if(S.mode==="exam"){
+    if(S.chosen==null)return; // debe elegir
+    const o=p.opts[S.chosen]; S.total++;
+    if(o.ok)S.ok++; else {S.wrong.push({p,chosen:o}); setFails([...getFails(),p.q.id]);}
+    S.log.push({id:p.q.id,ok:o.ok});
+  } else if(!S.locked) return;
+  sfx.click();
+  S.idx++;
+  S.cur=null;
+  const oldCard=$("#card"); if(oldCard)oldCard.style.pointerEvents="none";
+  if(S.n&&S.idx>=S.n){finish(false);return}
+  nextQ();
+}
+
+function finish(timeUp){
+  if(!S)return; stopTimer(); clearTimeout(S._auto);
+  const s=S; S=null;
+  // en el simulacro, lo que quedó sin responder cuenta como no respondido
+  const secs=Math.min((Date.now()-s.t0)/1000, s.limit||1e9);
+  const total = s.mode==="exam"? CONFIG.EXAM_QUESTIONS : s.total;
+  const pct = total? Math.round(s.ok/total*100) : 0;
+  pushHist({d:Date.now(),mode:s.mode,ok:s.ok,total,secs:Math.round(secs)});
+  if(s.mode==="exam"?pct>=CONFIG.PASS_RATIO*100:pct>=70)sfx.win(); else sfx.lose();
+  results(s,total,pct,secs,timeUp);
+}
+
+function results(s,total,pct,secs,timeUp){
+  const names={mini:"Mini-test",exam:"Simulacro completo",cat:"Práctica: "+(CATS[s.cat]||""),review:"Repaso de fallos"};
+  const exam=s.mode==="exam";
+  const pass=pct>=CONFIG.PASS_RATIO*100;
+  const verdict=exam?`<span class="verdict ${pass?"pass":"fail"}">${pass?"Aprobado":"No aprobado"} · mínimo ${Math.round(CONFIG.PASS_RATIO*100)}%</span>`
+                    :`<span class="verdict neutral">${pct>=80?"¡Muy bien!":pct>=60?"Vas por buen camino":"A repasar un poco más"}</span>`;
+  const fails=s.wrong;
+  app.innerHTML=`
+    <div class="top"><span class="brand">${esc(names[s.mode])}</span><button class="icon" id="mute">${muted?"🔇":"🔔"}</button></div>
+    <div class="res">
+      <div class="big">${pct}%</div>
+      ${verdict}
+      <div class="meta"><span><b>${s.ok}</b> de <b>${total}</b> correctas</span><span><b>${fmt(secs)}</b> de tiempo</span></div>
+      ${timeUp?'<p class="lead" style="margin:12px auto 0">Se acabó el tiempo.</p>':''}
+      <div class="actions">
+        <button class="btn" data-act="again">Jugar otra vez</button>
+        ${fails.length||getFails().length?'<button class="btn yellow" data-act="review">Repasar fallos</button>':""}
+        <button class="btn alt" data-act="home">Inicio</button>
+      </div>
+    </div>
+    ${fails.length?`<div class="fails"><h3>Lo que fallaste (${fails.length})</h3>
+      ${fails.map(f=>{const p=f.p, right=p.opts.find(o=>o.ok);
+        const thumb=p.img?`<img src="${p.img}" alt="">`:(right.img?`<img src="${right.img}" alt="">`:"");
+        return `<div class="fail">${thumb}<div><p><b>${esc(p.prompt)}</b></p>
+          <p class="b">Tu respuesta: ${esc(f.chosen.t||("señal "+f.chosen.code))}</p>
+          <p class="a">Correcta: ${esc(right.t||("señal "+right.code))}</p>
+          <p class="c">${esc(p.exp)}</p></div></div>`}).join("")}</div>`:""}
+  `;
+  app._last={mode:s.mode,minutes:s.limit&&s.mode==="mini"?s.limit/60:null,cat:s.cat};
+  window.scrollTo(0,0);
+}
+
+/* ============================================================
+   INICIO
+   ============================================================ */
+let miniMin=3;
+function home(){
+  S=null; stopTimer(); offlineWarned=false;
+  const fails=getFails().length, hist=getHist();
+  const bestExam=hist.filter(h=>h.mode==="exam").reduce((m,h)=>Math.max(m,Math.round(h.ok/h.total*100)),0);
+  const nSigns=BANK.filter(isSignQ).length;
+  app.innerHTML=`
+    <div class="top"><span class="brand">Simulacro · Conducción Colombia</span><button class="icon" id="mute" aria-label="Sonido">${muted?"🔇":"🔔"}</button></div>
+    <h1>Practica el examen teórico de <em>conducción</em></h1>
+    <p class="lead">Banco de ${BANK.length} preguntas con las señales de tránsito del Manual de Señalización Vial de Colombia. Elige cómo quieres practicar.</p>
+    <div class="stats">
+      <div class="stat"><b>${BANK.length}</b><span>Preguntas</span></div>
+      <div class="stat"><b>${nSigns}</b><span>De señales</span></div>
+      <div class="stat"><b>${fails}</b><span>Por repasar</span></div>
+    </div>
+    <div class="grid">
+      <div class="mode">
+        <span class="tag">Rápido</span><h2>Mini-test por tiempo</h2>
+        <p>Responde todas las que puedas mientras corre el reloj. Ideal para ratos libres.</p>
+        <div class="seg" id="seg">${[1,3,5].map(m=>`<button data-m="${m}" class="${m===miniMin?"on":""}">${m} min</button>`).join("")}</div>
+        <button class="btn" data-act="mini">Jugar ${miniMin} minutos</button>
+      </div>
+      <div class="mode">
+        <span class="tag">Examen</span><h2>Simulacro completo</h2>
+        <p>${CONFIG.EXAM_QUESTIONS} preguntas, ${CONFIG.EXAM_MINUTES} minutos, sin ayudas hasta el final.${bestExam?` Tu mejor: <b>${bestExam}%</b>.`:""}</p>
+        <button class="btn" data-act="exam">Empezar simulacro</button>
+      </div>
+      <div class="mode">
+        <span class="tag">Por tema</span><h2>Práctica por categoría</h2>
+        <p>${CONFIG.PRACTICE_LEN} preguntas con explicación inmediata.</p>
+        <div class="chips">${Object.keys(CATS).map(c=>`<button data-cat="${c}">${esc(CATS[c])}</button>`).join("")}</div>
+      </div>
+      <div class="mode">
+        <span class="tag">Refuerzo</span><h2>Repaso de fallos</h2>
+        <p>${fails?`Tienes ${fails} pregunta${fails>1?"s":""} por reforzar. Si las aciertas, salen de la lista.`:"Aquí aparecerán las preguntas que falles para que las repases."}</p>
+        <button class="btn ${fails?"yellow":"alt"}" data-act="review" ${fails?"":"disabled"}>Repasar ${fails||""}</button>
+      </div>
+    </div>
+    <div class="foot">
+      <span>Imágenes: Wikimedia Commons (licencias libres). Las reglas pueden cambiar: confirma con tu escuela de conducción y la norma vigente.</span>
+      <button data-act="audit">Verificar señales</button>
+    </div>`;
+}
+
+/* ============================================================
+   VERIFICACIÓN DE SEÑALES (muestra cuáles cargan y cuáles no)
+   ============================================================ */
+function audit(){
+  S=null; stopTimer();
+  app.innerHTML=`
+    <div class="top"><span class="brand">Verificar señales</span><button class="btn alt" data-act="home">Volver</button></div>
+    <p class="lead">Cada señal se pide a Wikimedia Commons. Revisa que la imagen coincida con el significado. Las marcadas en rojo no cargaron: se omiten solas en los tests.</p>
+    <div class="sum" id="sum">Comprobando…</div>
+    <div class="audit">${SIGNS.map(s=>`<div class="tile" data-c="${s.code}"><div class="im"><img src="${imgUrl(s.code,220)}" alt="${s.code}" referrerpolicy="no-referrer"></div><b>${s.code}</b>${esc(s.meaning)}</div>`).join("")}</div>`;
+  let done=0,bad=0; const n=SIGNS.length;
+  document.querySelectorAll(".tile img").forEach(im=>{
+    const fin=ok=>{done++; if(!ok){bad++;im.closest(".tile").classList.add("err");im.remove()}
+      $("#sum").textContent=`${done-bad} cargan · ${bad} no cargan · ${n-done} pendientes`;};
+    if(im.complete&&im.naturalWidth)fin(true); else {im.onload=()=>fin(true);im.onerror=()=>fin(false)}
+  });
+}
+
+/* ============================================================
+   EVENTOS
+   ============================================================ */
+document.addEventListener("click",e=>{
+  const t=e.target.closest("button"); if(!t)return;
+  if(t.id==="mute"){muted=!muted;store.set("sc_muted",muted);t.textContent=muted?"🔇":"🔔";if(!muted){ctx();sfx.click()}return}
+  if(t.id==="exit"){ if(S&&S.total>0&&S.mode!=="exam"){finish(false)} else if(confirm("¿Salir del test?")){S=null;stopTimer();home()} return}
+  if(t.id==="next"){advance();return}
+  if(t.classList.contains("opt")){choose(+t.dataset.i);return}
+  if(t.dataset.m){miniMin=+t.dataset.m;ctx();sfx.pick();home();return}
+  if(t.dataset.cat){start("cat",{cat:t.dataset.cat});return}
+  const a=t.dataset.act; if(!a)return;
+  if(a==="mini")start("mini",{minutes:miniMin});
+  else if(a==="exam")start("exam");
+  else if(a==="review")start("review");
+  else if(a==="home"){ctx();sfx.click();home()}
+  else if(a==="audit")audit();
+  else if(a==="again"){const l=app._last||{};if(l.mode==="mini")start("mini",{minutes:l.minutes||3});else if(l.mode==="cat")start("cat",{cat:l.cat});else start(l.mode||"exam")}
+});
+document.addEventListener("keydown",e=>{
+  if(!S||!S.cur)return;
+  const k=e.key.toLowerCase(), map={"1":0,"2":1,"3":2,"4":3,"a":0,"b":1,"c":2,"d":3};
+  if(k in map&&!e.ctrlKey&&!e.metaKey){choose(map[k]);}
+  else if((k==="enter"||k===" ")&&$("#nextwrap")&&$("#nextwrap").style.display!=="none"){e.preventDefault();advance()}
+});
+
+window.addEventListener("hashchange",()=>{ if(location.hash==="#verificar")audit(); else home(); });
+if(location.hash==="#verificar")audit(); else home();
+</script>
+</body>
+</html>
